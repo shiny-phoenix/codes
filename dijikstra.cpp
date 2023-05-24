@@ -1,126 +1,104 @@
-// C++ program to find the shortest
-// path between any two nodes using
-// Floyd Warshall Algorithm.
-#include <bits/stdc++.h>
-using namespace std;
+// C program for Dijkstra's single source shortest path
+// algorithm. The program is for adjacency matrix
+// representation of the graph
 
-#define MAXN 100
-// Infinite value for array
-const int INF = 1e7;
+#include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
 
-int dis[MAXN][MAXN];
-int Next[MAXN][MAXN];
+// Number of vertices in the graph
+#define V 9
 
-// Initializing the distance and
-// Next array
-void initialise(int V,
-				vector<vector<int> >& graph)
+// A utility function to find the vertex with minimum
+// distance value, from the set of vertices not yet included
+// in shortest path tree
+int minDistance(int dist[], bool sptSet[])
 {
-	for (int i = 0; i < V; i++) {
-		for (int j = 0; j < V; j++) {
-			dis[i][j] = graph[i][j];
+	// Initialize min value
+	int min = INT_MAX, min_index;
 
-			// No edge between node
-			// i and j
-			if (graph[i][j] == INF)
-				Next[i][j] = -1;
-			else
-				Next[i][j] = j;
-		}
+	for (int v = 0; v < V; v++)
+		if (sptSet[v] == false && dist[v] <= min)
+			min = dist[v], min_index = v;
+
+	return min_index;
+}
+
+// A utility function to print the constructed distance
+// array
+void printSolution(int dist[])
+{
+	printf("Vertex \t\t Distance from Source\n");
+	for (int i = 0; i < V; i++)
+		printf("%d \t\t\t\t %d\n", i, dist[i]);
+}
+
+// Function that implements Dijkstra's single source
+// shortest path algorithm for a graph represented using
+// adjacency matrix representation
+void dijkstra(int graph[V][V], int src)
+{
+	int dist[V]; // The output array. dist[i] will hold the
+				// shortest
+	// distance from src to i
+
+	bool sptSet[V]; // sptSet[i] will be true if vertex i is
+					// included in shortest
+	// path tree or shortest distance from src to i is
+	// finalized
+
+	// Initialize all distances as INFINITE and stpSet[] as
+	// false
+	for (int i = 0; i < V; i++)
+		dist[i] = INT_MAX, sptSet[i] = false;
+
+	// Distance of source vertex from itself is always 0
+	dist[src] = 0;
+
+	// Find shortest path for all vertices
+	for (int count = 0; count < V - 1; count++) {
+		// Pick the minimum distance vertex from the set of
+		// vertices not yet processed. u is always equal to
+		// src in the first iteration.
+		int u = minDistance(dist, sptSet);
+
+		// Mark the picked vertex as processed
+		sptSet[u] = true;
+
+		// Update dist value of the adjacent vertices of the
+		// picked vertex.
+		for (int v = 0; v < V; v++)
+
+			// Update dist[v] only if is not in sptSet,
+			// there is an edge from u to v, and total
+			// weight of path from src to v through u is
+			// smaller than current value of dist[v]
+			if (!sptSet[v] && graph[u][v]
+				&& dist[u] != INT_MAX
+				&& dist[u] + graph[u][v] < dist[v])
+				dist[v] = dist[u] + graph[u][v];
 	}
+
+	// print the constructed distance array
+	printSolution(dist);
 }
 
-// Function construct the shortest
-// path between u and v
-vector<int> constructPath(int u,
-						int v)
-{
-	// If there's no path between
-	// node u and v, simply return
-	// an empty array
-	if (Next[u][v] == -1)
-		return {};
-
-	// Storing the path in a vector
-	vector<int> path = { u };
-	while (u != v) {
-		u = Next[u][v];
-		path.push_back(u);
-	}
-	return path;
-}
-
-// Standard Floyd Warshall Algorithm
-// with little modification Now if we find
-// that dis[i][j] > dis[i][k] + dis[k][j]
-// then we modify next[i][j] = next[i][k]
-void floydWarshall(int V)
-{
-	for (int k = 0; k < V; k++) {
-		for (int i = 0; i < V; i++) {
-			for (int j = 0; j < V; j++) {
-
-				// We cannot travel through
-				// edge that doesn't exist
-				if (dis[i][k] == INF
-					|| dis[k][j] == INF)
-					continue;
-
-				if (dis[i][j] > dis[i][k]
-									+ dis[k][j]) {
-					dis[i][j] = dis[i][k]
-								+ dis[k][j];
-					Next[i][j] = Next[i][k];
-				}
-			}
-		}
-	}
-}
-
-// Print the shortest path
-void printPath(vector<int>& path)
-{
-	int n = path.size();
-	for (int i = 0; i < n - 1; i++)
-		cout << path[i] << " -> ";
-	cout << path[n - 1] << endl;
-}
-
-// Driver code
+// driver's code
 int main()
 {
+	/* Let us create the example graph discussed above */
+	int graph[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
+						{ 4, 0, 8, 0, 0, 0, 0, 11, 0 },
+						{ 0, 8, 0, 7, 0, 4, 0, 0, 2 },
+						{ 0, 0, 7, 0, 9, 14, 0, 0, 0 },
+						{ 0, 0, 0, 9, 0, 10, 0, 0, 0 },
+						{ 0, 0, 4, 14, 10, 0, 2, 0, 0 },
+						{ 0, 0, 0, 0, 0, 2, 0, 1, 6 },
+						{ 8, 11, 0, 0, 0, 0, 1, 0, 7 },
+						{ 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
 
-	int V = 4;
-	vector<vector<int> > graph
-		= { { 0, 3, INF, 7 },
-			{ 8, 0, 2, INF },
-			{ 5, INF, 0, 1 },
-			{ 2, INF, INF, 0 } };
-
-	// Function to initialise the
-	// distance and Next array
-	initialise(V, graph);
-
-	// Calling Floyd Warshall Algorithm,
-	// this will update the shortest
-	// distance as well as Next array
-	floydWarshall(V);
-	vector<int> path;
-
-	// Path from node 1 to 3
-	cout << "Shortest path from 1 to 3: ";
-	path = constructPath(1, 3);
-	printPath(path);
-
-	// Path from node 0 to 2
-	cout << "Shortest path from 0 to 2: ";
-	path = constructPath(0, 2);
-	printPath(path);
-
-	// path from node 3 to 2
-	cout << "Shortest path from 3 to 2: ";
-	path = constructPath(3, 2);
-	printPath(path);
+	// Function call
+	dijkstra(graph, 0);
 
 	return 0;
 }
