@@ -14,6 +14,7 @@ struct Student {
 void addStudent(const Student& student) {
     ofstream file("students.txt", ios::app);
     if (file.is_open()) {
+        
         file << student.rollno << " "
              << student.name << " "
              << student.division << " "
@@ -120,9 +121,10 @@ int main() {
     while (true) {
         cout << "Menu:\n";
         cout << "1. Add Student\n";
-        cout << "2. Delete Student\n";
-        cout << "3. Search Student\n";
-        cout << "4. Exit\n";
+        cout << "2. Insert at position\n";
+        cout << "3. Delete Student\n";
+        cout << "4. Search Student\n";
+        cout << "5. Exit\n";
         cout << "Enter your choice: ";
         cin >> choice;
 
@@ -140,25 +142,38 @@ int main() {
                 addStudent(student);
                 break;
             case 2:
+                cout<<"position";
+                cin>>position;
+                cout << "Enter Roll No: ";
+                cin >> student.rollno;
+                cin.ignore();
+                cout << "Enter Name: ";
+                getline(cin, student.name);
+                cout << "Enter Division: ";
+                getline(cin, student.division);
+                cout << "Enter Address: ";
+                getline(cin, student.address);
+                insertStudent(position, student);
+                break;
+
+            case 3:
                 cout << "Enter Roll No of the student to delete: ";
                 cin >> rollno;
                 deleteStudent(rollno);
                 break;
           
-            case 3:
+            case 4:
                 cout << "Enter Roll No of the student to search: ";
                 cin >> rollno;
                 searchStudent(rollno);
                 break;
-            case 4:
+            case 5:
                 cout << "Exiting program." << endl;
                 return 0;
             default:
                 cout << "Invalid choice. Please try again." << endl;
         }
-
         cout << endl;
     }
-
     return 0;
 }

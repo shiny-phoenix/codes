@@ -47,7 +47,7 @@ class Binary_Tree
                 node* mirror_image(node*);
                 bool check_equal (node* , node*);  
                 
-                node* search(node*, int);
+                //node* search(node*, int);
                 node* delete_node(node*, int);
                 node* buildTree(int in[], int pre[], int inStrt, int inEnd);
 
@@ -141,7 +141,7 @@ void Binary_Tree :: postorder(node* Root)              //recursive
                 cout<<Root->data<<",";
         }
 }
- 
+
 void Binary_Tree :: level_order()
 {
         queue<node*> lvl;
@@ -286,7 +286,7 @@ bool Binary_Tree :: check_equal (node* Root1 , node* Root2)
                 else return 0;
         }       
 }
-
+/*
 node* Binary_Tree :: search( node* Root,int value)
 {
         if (root->data > value)
@@ -308,17 +308,17 @@ node* Binary_Tree :: search( node* Root,int value)
             return search(root->right, value);
     }
 }
-
+*/
 node* Binary_Tree :: delete_node( node* root, int key)
 {
-    if (root == NULL)
-        return root;
+    if (root == NULL)        return root;
 
     if (root->data > key) 
     {
         root->left = delete_node(root->left, key);
         return root;
     }
+
     else if (root->data < key)
     {
         root->right = delete_node(root->right, key);
@@ -352,10 +352,9 @@ node* Binary_Tree :: delete_node( node* root, int key)
             succ = succ->left;
         }
 
-        if (succParent != root)
-            succParent->left = succ->right;
-        else
-            succParent->right = succ->right;
+        if (succParent != root)            succParent->left = succ->right;
+
+        else                               succParent->right = succ->right;
 
         root->data = succ->data;
  
@@ -368,31 +367,24 @@ int search_index(int arr[], int strt, int end, int value)
 {
     for (int i = strt; i <= end; i++)
     {
-        if (arr[i] == value)
-            return i;
-    }
-    
+        if (arr[i] == value)            return i;
+    } 
 }
  
 node* Binary_Tree :: buildTree(int in[], int pre[], int inStrt, int inEnd)
 {
     static int preIndex = 0;
- 
-    if (inStrt > inEnd)
-        return NULL;
- 
+    if (inStrt > inEnd)        return NULL;
+
     node* tNode = new node(pre[preIndex++]);
- 
-    if (inStrt == inEnd)
-        return tNode;
- 
+    if (inStrt == inEnd)        return tNode;
+
     int inIndex = search_index(in, inStrt, inEnd, tNode->data);
  
     tNode->left = buildTree(in, pre, inStrt, inIndex - 1);
     tNode->right = buildTree(in, pre, inIndex + 1, inEnd);
- 
-    return tNode;
     
+    return tNode;
 }
  
 int main()

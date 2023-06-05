@@ -1,93 +1,95 @@
-// C program for Dijkstra's single source shortest path
-// algorithm. The program is for adjacency matrix
-// representation of the graph
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
 
-#include <limits.h>
-#include <stdbool.h>
-#include <stdio.h>
+#define INF std::numeric_limits<int>::max()
 
-// Number of vertices in the graph
-#define V 9
+// Structure to represent a vertex and its distance from the source
+struct Vertex {
+    int index;
+    int distance;
 
-// A utility function to find the vertex with minimum
-// distance value, from the set of vertices not yet included
-// in shortest path tree
-int minDistance(int dist[], bool sptSet[])
+    bool operator<(const Vertex& other) 
+	const {
+        return distance > other.distance;
+    	}
+};
+
+// Dijkstra's algorithm to find the shortest path between two vertices
+std::pair<std::vector<int>, int> dijkstra(const std::vector<std::vector<int>>& graph, int source, int destination)
 {
-	// Initialize min value
-	int min = INT_MAX, min_index;
+    int numVertices = graph.size();
 
-	for (int v = 0; v < V; v++)
-		if (sptSet[v] == false && dist[v] <= min)
-			min = dist[v], min_index = v;
+    // Create a vector to store the distances from the source
+    std::vector<int> distances(numVertices, INF);
 
-	return min_index;
+    // Create a vector to store the previous vertex in the shortest path
+    std::vector<int> previous(numVertices, -1);
+
+    // Create a priority queue to store the vertices to be processed
+    std::priority_queue<Vertex> pq;
+
+    // Set the distance of the source vertex to 0 and add it to the priority queue
+    distances[source] = 0;
+    pq.push({source, 0});
+
+    while (!pq.empty()) {
+        // Get the vertex with the minimum distance from the priority queue
+        Vertex current = pq.top();
+        pq.pop();
+
+        // Stop if the destination vertex is reached
+        if (current.index == destination)
+            break;
+
+        // Explore the neighbors of the current vertex
+        for (int i = 0; i < numVertices; ++i) {
+            int weight = graph[current.index][i];
+            if (weight > 0) { // If there is an edge to the neighbor
+                int distance = current.distance + weight;
+
+                // Update the distance if a shorter path is found
+                if (distance < distances[i]) {
+                    distances[i] = distance;
+                    previous[i] = current.index;
+                    pq.push({i, distance});
+                }
+            }
+        }
+    }
+
+    // Reconstruct the shortest path from the source to the destination
+    std::vector<int> shortestPath;
+    int current = destination;
+    while (current != -1) {
+        shortestPath.insert(shortestPath.begin(), current);
+        current = previous[current];
+    }
+
+    // Return the shortest path and the minimum distance
+    return {shortestPath, distances[destination]};
 }
 
-// A utility function to print the constructed distance
-// array
-void printSolution(int dist[])
-{
-	printf("Vertex \t\t Distance from Source\n");
-	for (int i = 0; i < V; i++)
-		printf("%d \t\t\t\t %d\n", i, dist[i]);
+// Function to display the shortest path
+void displayShortestPath(const std::vector<int>& shortestPath, int minDistance) {
+    std::cout << "Shortest path: ";
+    for (int i = 0; i < shortestPath.size(); ++i) {
+        std::cout << shortestPath[i];
+        if (i != shortestPath.size() - 1)
+            std::cout << " -> ";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "Min distance from source to destination: " << minDistance << std::endl;
 }
 
-// Function that implements Dijkstra's single source
-// shortest path algorithm for a graph represented using
-// adjacency matrix representation
-void dijkstra(int graph[V][V], int src)
-{
-	int dist[V]; // The output array. dist[i] will hold the
-				// shortest
-	// distance from src to i
+int main() {
+    int numVertices = 9; // Number of vertices in the graph
 
-	bool sptSet[V]; // sptSet[i] will be true if vertex i is
-					// included in shortest
-	// path tree or shortest distance from src to i is
-	// finalized
-
-	// Initialize all distances as INFINITE and stpSet[] as
-	// false
-	for (int i = 0; i < V; i++)
-		dist[i] = INT_MAX, sptSet[i] = false;
-
-	// Distance of source vertex from itself is always 0
-	dist[src] = 0;
-
-	// Find shortest path for all vertices
-	for (int count = 0; count < V - 1; count++) {
-		// Pick the minimum distance vertex from the set of
-		// vertices not yet processed. u is always equal to
-		// src in the first iteration.
-		int u = minDistance(dist, sptSet);
-
-		// Mark the picked vertex as processed
-		sptSet[u] = true;
-
-		// Update dist value of the adjacent vertices of the
-		// picked vertex.
-		for (int v = 0; v < V; v++)
-
-			// Update dist[v] only if is not in sptSet,
-			// there is an edge from u to v, and total
-			// weight of path from src to v through u is
-			// smaller than current value of dist[v]
-			if (!sptSet[v] && graph[u][v]
-				&& dist[u] != INT_MAX
-				&& dist[u] + graph[u][v] < dist[v])
-				dist[v] = dist[u] + graph[u][v];
-	}
-
-	// print the constructed distance array
-	printSolution(dist);
-}
-
-// driver's code
-int main()
-{
-	/* Let us create the example graph discussed above */
-	int graph[V][V] = { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
+    // Example graph represented using an adjacency matrix
+    std::vector<std::vector<int>> graph = {
+                        { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
 						{ 4, 0, 8, 0, 0, 0, 0, 11, 0 },
 						{ 0, 8, 0, 7, 0, 4, 0, 0, 2 },
 						{ 0, 0, 7, 0, 9, 14, 0, 0, 0 },
@@ -95,10 +97,17 @@ int main()
 						{ 0, 0, 4, 14, 10, 0, 2, 0, 0 },
 						{ 0, 0, 0, 0, 0, 2, 0, 1, 6 },
 						{ 8, 11, 0, 0, 0, 0, 1, 0, 7 },
-						{ 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
+						{ 0, 0, 2, 0, 0, 0, 6, 7, 0 }
+    };
 
-	// Function call
-	dijkstra(graph, 0);
+    int source = 0; // Source vertex
+    int destination = 4; // Destination vertex
 
-	return 0;
+    // Run Dijkstra's algorithm to find the shortest path and minimum distance
+    std::pair<std::vector<int>, int> result = dijkstra(graph, source, destination);
+
+    // Display the shortest path and minimum distance
+    displayShortestPath(result.first, result.second);
+
+    return 0;
 }

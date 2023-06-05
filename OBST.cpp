@@ -1,6 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define MAX 50
+int w[MAX][MAX], c[MAX][MAX], r[MAX][MAX];
 
 struct Node
 {
@@ -25,18 +26,18 @@ Node* construct(int r[][MAX], int i, int j)
 
 Node* optimalbst(int p[], int q[], int n)
 {
-    int w[MAX][MAX], c[MAX][MAX], r[MAX][MAX];
+    
     for(int i=0;i<=n;i++){
         for(int j=0;j<=n;j++){
             w[i][j] = c[i][j] = r[i][j] = 0;
         }
     }
     for(int i=1;i<=n;i++){
-        w[i][i] = q[i-1] + p[i] + q[i];
+        w[i][i] = q[i];// q[i-1] + p[i] + q[i];
         c[i][i] = w[i][i];
-        r[i][i] = i;
+        r[i][i] = 0;//i;
     }
-    for(int sz = 2;sz<=n;++sz){
+    for(int sz = 2;sz<=n;sz++){
         for(int i=1;i+sz-1<=n;i++){
             int j = i+sz-1;
             w[i][j] = w[i][j-1] + p[j] + q[j];
@@ -60,6 +61,16 @@ void preorder(string words[], Node* node)
     cout<<words[node->data]<<" ";
     preorder(words, node->left);
     preorder(words, node->right);
+
+}
+
+void inorder(string words[], Node* node)
+{
+    if(!node) return;
+    
+    inorder(words, node->left);
+    cout<<words[node->data]<<" ";
+    inorder(words, node->right);
 }
 
 int main()
@@ -82,8 +93,44 @@ int main()
         cin>>q[i];
     }
     Node* root = optimalbst(p,q,n);
-    cout<<"Preorder of Optimal Binary Search Tree: "<<endl;
+    cout<<"Preorder : ";
     preorder(words, root);
+    cout<<endl;
+
+    cout<<"inorder : ";
+    inorder(words, root);
+    cout<<endl;
+
+    // Display weight matrix
+    cout << "Weight Matrix:\n";
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            cout << w[i][j] << "\t";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    // Display cost matrix
+    cout << "Cost Matrix:\n";
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            cout << c[i][j] << "\t";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
+    // Display root matrix
+    cout << "Root Matrix:\n";
+    for (int i = 0; i <= n; i++) {
+        for (int j = 0; j <= n; j++) {
+            cout << r[i][j] << "\t";
+        }
+        cout << endl;
+    }
+    cout << endl;
+
     cout<<endl;
     return 0;
 }

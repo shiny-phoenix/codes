@@ -1,333 +1,160 @@
-#include<iostream>
-#include<cstring>
-#include<cstdlib>
-#define MAX 50
-#define SIZE 20
+#include<bits/stdc++.h>
 using namespace std;
 
-struct AVLnode
+class node
 {
-	public:
-	char cWord[SIZE],cMeaning[MAX];
-	AVLnode *left,*right;
-	int iB_fac,iHt;
+    private:
+        int data,height;
+        node* left;
+        node* right;
+    public:
+        node()
+        {
+            data = 0;
+            height = 0;
+            left = NULL;
+            right = NULL;
+        }
+        node(int key)
+        {
+            this->data = key;
+            this->height = 1;
+            this->left = NULL;
+            this->right = NULL;
+        }
+
+        friend class AVL;
 };
 
-class AVLtree
+class AVL
 {
-	
-	public:
-		AVLnode *root;
-		AVLtree()
-		{
-			root=NULL;
-		}
-		int height(AVLnode*);
-		int bf(AVLnode*);
-		AVLnode* insert(AVLnode*,char[SIZE],char[MAX]);
-		AVLnode* rotate_left(AVLnode*);
-		AVLnode* rotate_right(AVLnode*);
-		AVLnode* LL(AVLnode*);
-		AVLnode* RR(AVLnode*);
-		AVLnode* LR(AVLnode*);
-		AVLnode* RL(AVLnode*);
-		AVLnode* delet(AVLnode*,char x[SIZE]);
-		void inorder(AVLnode*);
-        void Search(char []);
-        void UpdateMeaning(char [], char []);
-        
-
+    private:
+        node* root;
+    public:
+        AVL()   {root = NULL;}
+        void setroot(node* x)      {root = x;}
+        node* getroot()         {return root;}
+        int getHeight(node*);
+        int getBalanceFactor(node* node);
+        node* insert(node*,int);
+        void traversal(node*);
+        int height_of_tree(node*);
+        node* left_rotate(node*);
+        node* right_rotate(node*);
 };
 
-AVLnode *AVLtree::delet(AVLnode *curr,char x[SIZE])
+int AVL :: getBalanceFactor(node* node) 
 {
-	AVLnode *temp;
-	if(curr==NULL)
-		return(0);
-	else
-		if(strcmp(x,curr->cWord)>0)
-		{
-			curr->right=delet(curr->right,x);
-			if(bf(curr)==2)
-			if(bf(curr->left)>=0)
-				curr=LL(curr);
-			else
-				curr=LR(curr);
-		}
-		else
-		if(strcmp(x,curr->cWord)<0)
-		{
-			curr->left=delet(curr->left,x);
-			if(bf(curr)==-2)
-			if(bf(curr->right)<=0)
-				curr=RR(curr);
-			else
-				curr=RL(curr);
-		}
-	else
-	{
-		if(curr->right!=NULL)
-		{
-			temp=curr->right;
-			while(temp->left!=NULL)
-			temp=temp->left;
-			strcpy(curr->cWord,temp->cWord);
-			curr->right=delet(curr->right,temp->cWord);
-			if(bf(curr)==2)
-			if(bf(curr->left)>=0)
-				curr=LL(curr);
-			else
-				curr=LR(curr);
-		}
-		else
-		return(curr->left);
-	}
-	curr->iHt=height(curr);
-	return(curr);
+        if (node == nullptr)             return 0;
+        return getHeight(node->left) - getHeight(node->right);
 }
 
-
-AVLnode* AVLtree :: insert(AVLnode*root,char newword[SIZE],char newmeaning[MAX])
+int AVL :: getHeight(node* n)
 {
-	if(root==NULL)
-	{
-		root=new AVLnode;
-		root->left=root->right=NULL;
-		strcpy(root->cWord,newword);
-		strcpy(root->cMeaning,newmeaning);
-	}
-	
-	else if(strcmp(root->cWord,newword)!=0)
-	{
-		if(strcmp(root->cWord,newword)>0)
-		{
-			root->left=insert(root->left,newword,newmeaning);
-			if(bf(root)==2)
-			{
-				if (strcmp(root->left->cWord,newword)>0)
-					root=LL(root);
-				else
-					root=LR(root);
-			}
-		}
-		
-		else if(strcmp(root->cWord,newword)<0)
-		{
-			root->right=insert(root->right,newword,newmeaning);
-			if(bf(root)==-2)
-			{
-				if(strcmp(root->right->cWord,newword)>0)
-					root=RR(root);
-				else
-					root=RL(root);
-			}
-		}
-	}
-	else
-		cout<<"\nRedundant AVLnode";
-	root->iHt=height(root);
-	return root;
+        if (n == nullptr)             return 0;
+        return n->height;
 }
 
-int AVLtree :: height(AVLnode* curr)
+node* AVL :: insert(node* current,int key)
 {
-	int lh,rh;
-	if(curr==NULL)
-		return 0;
-	if(curr->right==NULL && curr->left==NULL)
-		return 0;
-	else
-	{
-		lh=lh+height(curr->left);
-		rh=rh+height(curr->right);
-		if(lh>rh)
-			return lh+1;
-		return rh+1;
-	}
-}		
-
-int AVLtree :: bf(AVLnode* curr)
-{
-	int lh,rh;
-	if(curr==NULL)
-		return 0;
-	else
-	{
-		if(curr->left==NULL)
-			lh=0;
-		else
-			lh=1+curr->left->iHt;
-		if(curr->right==NULL)
-			rh=0;
-		else
-			rh=1+curr->right->iHt;
-		return(lh-rh);
-	}
-}
-			
-AVLnode* AVLtree :: rotate_right(AVLnode* curr)
-{
-	AVLnode* temp;
-	temp=curr->left;
-	curr->left=temp->right;
-	temp->left=curr;
-	curr->iHt=height(curr);
-	temp->iHt=height(temp);
-	return temp;
-}
-
-AVLnode* AVLtree :: rotate_left(AVLnode* curr)
-{
-	AVLnode* temp;
-	temp=curr->right;
-	curr->right=temp->left;
-	temp->left=curr;
-	curr->iHt=height(curr);
-	temp->iHt=height(temp);
-	return temp;
-}
-
-AVLnode* AVLtree :: RR(AVLnode* curr)
-{
-	curr=rotate_left(curr);
-	return curr;
-}
-
-AVLnode* AVLtree :: LL(AVLnode* curr)
-{
-	curr=rotate_right(curr);
-	return curr;
-}
-	
-AVLnode* AVLtree :: RL(AVLnode* curr)
-{
-	curr->right=rotate_right(curr->right);
-	curr=rotate_left(curr);
-	return curr;
-}
-
-AVLnode* AVLtree::LR(AVLnode* curr)
-{
-	curr->left=rotate_left(curr->left);
-	curr=rotate_right(curr);
-	return curr;
-}
-
-void AVLtree :: inorder(AVLnode* curr)
-{
-	if(curr!=NULL)
-	{
-		inorder(curr->left);
-		cout<<"\n\t"<<curr->cWord<<"\t"<<curr->cMeaning;
-		inorder(curr->right);
-	}
-}
-
-void AVLtree::Search(char word[SIZE])
-{
-    AVLnode* current = root;
-    int comparisons = 0;
-
-    while (current != NULL)
+    if(current == NULL)
     {
-        comparisons++;
-        if (strcmp(word, current->cWord) == 0)
-        {
-            cout << "Word '" << word << "' is present in the AVL tree." << endl;
-            cout << "Number of comparisons: " << comparisons << endl;
-            return;
-        }
-        else if (strcmp(word, current->cWord) < 0)
-            current = current->left;
-        else
-            current = current->right;
+        node* temp = new node(key);
+        return temp;
+    }
+    if(key<current->data)  current->left = insert(current->left,key);
+
+    else    current->right = insert(current->right,key);
+
+    current->height = 1 + max(getHeight(current->left) , getHeight(current->right));
+
+    int balance_factor = getBalanceFactor(current);
+
+    if(balance_factor > 1 && key < current->left->data)     return right_rotate(current);
+    
+    else if(balance_factor > 1 && key > current->left->data)
+    {
+        current->left = left_rotate(current->left);
+        return right_rotate(current);
+    }
+    else if (balance_factor < -1 && key > current->right->data)  return left_rotate(current);
+    
+    else if (balance_factor < -1 && key < current->right->data)
+    {
+        current->right = right_rotate(current->right);
+        return left_rotate(current);
     }
 
-    cout << "Word '" << word << "' is not present in the AVL tree." << endl;
+    return current;
 }
 
-void AVLtree::UpdateMeaning(char word[SIZE], char newMeaning[MAX])
+node* AVL :: right_rotate(node* current)
 {
-    AVLnode* current = root;
-    int comparisons = 0;
+    node* y = current->left;
+    node* z = y->right;
 
-    while (current != NULL)
+    y->right = current;
+    current->left = z;
+    current->height = 1 + max(getHeight(current->left), getHeight(current->right));
+    y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+
+    return y;
+}
+
+node* AVL :: left_rotate(node* current)
+{
+    node* y = current->right;
+    node* z = y->left;
+
+    y->left = current;
+    current->right = z;
+    current->height = 1 + max(getHeight(current->left), getHeight(current->right));
+    y->height = 1 + max(getHeight(y->left), getHeight(y->right));
+
+    return y;
+}
+
+void AVL :: traversal(node* Root)
+{
+    if(Root== NULL) return;
+    queue<node*> q;
+    q.push(Root);
+    while(!q.empty())
     {
-        comparisons++;
-        if (strcmp(word, current->cWord) == 0)
-        {
-            // Word found, update the meaning
-            strcpy(current->cMeaning, newMeaning);
-            cout << "Meaning updated for word '" << word << "'." << endl;
-            cout << "Number of comparisons: " << comparisons << endl;
-            return;
-        }
-        else if (strcmp(word, current->cWord) < 0)
-            current = current->left;
-        else
-            current = current->right;
+        node* temp = q.front();
+        q.pop();
+        cout<<temp->data<<" ";
+        if(temp->left != NULL)     q.push(temp->left);
+        if(temp->right != NULL)    q.push(temp->right);
     }
+    cout<<endl;
+}
 
-    cout << "Word '" << word << "' is not present in the AVL tree." << endl;
+int AVL :: height_of_tree(node* Root)
+{
+    if(Root == NULL)    return 0;
+    return 1 + max(height_of_tree(Root->left), height_of_tree(Root->right));
 }
 
 int main()
 {
-	int iCh;
-	AVLtree a;
-	AVLnode *curr=NULL;
-	char cWd[SIZE],cMean[MAX];
-    char searchWord[SIZE];
-    char wordToUpdate[SIZE];
-    char newMeaning[MAX];
-	do
-	{	
-		cout<<"\n1.Insert\n2.Display\n3.Delete\n4.Search\n5.Update meaning\n6.Exit";
-		cout<<"\nEnter your choice :";
-		cin>>iCh;
-		
-		switch(iCh)
-		{
-			case 1:	cout<<"\nEnter Word : ";
-				cin>>cWd;
-				cout<<"\nEnter Meaning : ";
-				cin.ignore();
-				cin.getline(cMean,MAX);
-				a.root=a.insert(a.root,cWd,cMean);
-				break;
-			
-			case 2:	cout<<"\n\tWORD\tMEANING";
-				a.inorder(a.root);
-				break;
-				
-			case 3:	cout<<"\nEnter the word to be deleted : ";
-					cin>>cWd;
-					curr=a.delet(a.root,cWd);
-					if(curr==NULL)
-						cout<<"\nWord not present!";
-					else
-						cout<<"\nWord deleted Successfully!";
-					curr=NULL;
-					break;
-            case 4:
-                    cout << "Enter the word to search: ";
-                    cin >> searchWord;
-                    a.Search(searchWord);
-                    break;
-            case 5:
-                    cout << "Enter the word to update its meaning: ";
-                    cin >> wordToUpdate;
-                    cout << "Enter the new meaning: ";
-                    cin.ignore();
-                    cin.getline(newMeaning, MAX);
+    AVL tree;
+    int n;
+    cout<<"Enter no of elements to enter :";
+    cin>>n;
 
-                    a.UpdateMeaning(wordToUpdate, newMeaning);
-                    break;
+    int x;
+    cout<<"Enter elements :";
+    for(int i=0; i<n ; i++)
+    {
+        cin>>x;
+        tree.setroot(tree.insert(tree.getroot(),x));
+    }
 
-			
-			case 6:	exit(0);
-		}
-	}while(iCh!=6);
-	 
-	return 0;
+    cout<<"Traversal :";
+    tree.traversal(tree.getroot());
+
+    x = tree.getHeight(tree.getroot());
+    cout<<"Height "<<x<<endl;
 }
+    

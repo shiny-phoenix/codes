@@ -84,12 +84,6 @@ void Threaded_BST ::insert(int data)
     {
         root = ptr;
         dummy_node->data = root->data;
-        /*
-        dummy_node->left = root;
-        dummy_node->right = dummy_node;
-        dummy_node->left_thread = 0;
-        dummy_node->right_thread = 0;
-        */
         root->left = dummy_node;
         root->left_thread = 1;
         root->right = dummy_node;
@@ -343,7 +337,7 @@ void Threaded_BST ::bst_to_threaded()
 {
     stack<node *> st;
     node *curr = root;
-
+    //store inorder traversal
     while (curr != NULL || st.empty() == false)
     {
         while (curr != NULL)
@@ -356,9 +350,7 @@ void Threaded_BST ::bst_to_threaded()
         v.push_back(curr);
         curr = curr->right;
     }
-    /*for(int i = 0; i < v.size(); i++){
-        cout<<v[i]->data<<" ";
-    }*/
+    
     for (int i = 0; i < v.size(); i++)
     {
         if (i == 0)
@@ -488,6 +480,7 @@ int main()
 
         case 6:
             tree.bst_to_threaded();
+            break;
 
         default:
             exit(0);

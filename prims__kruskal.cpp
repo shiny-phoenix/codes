@@ -52,7 +52,7 @@ void MST ::input()
         cout << "Enter the vertices having edges and its weight : ";
         int x, y, weight;
         cin >> x >> y >> weight;
-        p.push_back(make_pair(weight, make_pair(x, y)));
+        p.push_back({weight, {x, y}});
         adjmatrix[x][y] = weight;
         adjmatrix[y][x] = weight;
     }
